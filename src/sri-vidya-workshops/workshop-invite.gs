@@ -2,13 +2,14 @@ function sendEmail() {
   var sv = SpreadsheetApp.getActiveSpreadsheet()
 
   // get workshop details
-  var batch_sheet_name = 'batch3'
+  // var batch_sheet_name = sv.getActiveSheet().getName();
+  var batch_sheet_name = 'batch4';
+  console.log(batch_sheet_name);
   var form_data=sv.getSheetByName(batch_sheet_name);
   var subject = form_data.getRange(1,10).getValue();
   var batch_no = form_data.getRange(2,10).getValue();
   var starting_seq_id = form_data.getRange(10,10).getValue();
   var index_count = form_data.getRange(11,10).getValue();
-
 
   // time math
   var event_duration_hrs = form_data.getRange(6,10).getValue();
@@ -48,7 +49,7 @@ function sendEmail() {
     var name = form_data.getRange(index, 3).getValue();
     var status = form_data.getRange(index, 6).getValue();
 
-    // Already registered
+    // Already set a registration
     if (status != "") {
       console.log('Skip ' + name);
       continue;
@@ -58,14 +59,14 @@ function sendEmail() {
     seq = starting_seq_id + index - index_start;
     var id = 'SVUW' + batch_no + '-' + seq.toString();
 
-    // prepare message for this user
-    var templ = HtmlService.createTemplateFromFile('registration-email');
+    // prepare message
+    var templ = HtmlService.createTemplateFromFile('workshop-email');
     templ.first_name = name;
     templ.regid = id;
     templ.event = event;
     var message = templ.evaluate().getContent();
     
-    // send email with customized message
+    // send email
     MailApp.sendEmail({
       to: emailAddress,
       subject: subject,
@@ -73,9 +74,10 @@ function sendEmail() {
     });
 
     console.log('Sent to ' + name);
+    // console.log('Body ' + message);
 
-    // mail sent. Bookkeeping now.
+    // set values
     form_data.getRange(index,5).setValue(id);
     form_data.getRange(index,6).setValue('SENT');
   }
-} 
+}
